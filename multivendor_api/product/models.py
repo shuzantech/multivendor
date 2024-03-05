@@ -6,5 +6,6 @@ class Product(models.Model):
     selling_price = models.FloatField()
     discount_price = models.FloatField()
     description = models.CharField(max_length=255)  
-    product_image = models.ImageField(upload_to='product_images/')  
+    product_image = models.ImageField(upload_to='product_images')  
     category = models.CharField(max_length=50)  
+    sub_category = models.CharField(max_length=50) 
