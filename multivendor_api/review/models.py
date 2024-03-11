@@ -11,8 +11,8 @@ class Review(models.Model):
         (5, 'Excellent')
     )
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name="products_review", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="users_review", on_delete=models.CASCADE)
     rating = models.IntegerField(choices=RATING_CHOICES)
     comment = models.TextField()
     date_posted = models.DateTimeField(auto_now_add=True)
