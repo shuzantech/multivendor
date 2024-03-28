@@ -1,23 +1,26 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Review
-from .forms import ReviewForm  # You need to create a form for handling review input
-from django.contrib.auth.decorators import login_required
+from .serializers import ReviewSerializer
+from product.models import Product
 
-@login_required
-def create_review(request, product_id):
-    if request.method == 'POST':
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.user = request.user
-            review.product_id = product_id
-            review.save()
-            return redirect('product_detail', product_id=product_id)
+@api_view(['POST'])
+def add_review(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    serializer = ReviewSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save(product=product, user=request.user)  # Assuming user is authenticated
+        return JsonResponse({'success': True})
     else:
-        form = ReviewForm()
+        return JsonResponse({'success': False, 'errors': serializer.errors}, status=400)
 
-    return render(request, 'create_review.html', {'form': form})
+@api_view(['GET'])
+def get_product_reviews(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    reviews = product.products_review.all()  # Fetch all reviews related to the product
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
 
-def product_detail(request, product_id):
-    product_reviews = Review.objects.filter(product_id=product_id)
-    return render(request, 'product_detail.html', {'product_reviews': product_reviews})
